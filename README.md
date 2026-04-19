@@ -4,6 +4,24 @@ ShelfSense API is a coursework project for `XJCO3011 Web Services and Web Data`.
 It provides book search, reading list management, reviews, analytics, and
 recommendation endpoints backed by a SQL database and Open Library data.
 
+## Project Overview
+
+ShelfSense API is a data-driven REST API for book discovery and personal reading
+management. The project combines:
+
+- public book metadata from Open Library
+- local SQL storage for user accounts, reading lists, cached books, and reviews
+- analytics endpoints for user preferences and genre trends
+- recommendation endpoints based on saved books and ratings
+
+The API was designed to satisfy the coursework requirements for:
+
+- CRUD operations backed by a SQL database
+- HTTP endpoints with JSON responses
+- correct error handling and status codes
+- external data integration
+- clear documentation and version-controlled development
+
 ## Tech Stack
 
 - FastAPI
@@ -28,6 +46,30 @@ tests/
 requirements.txt
 ```
 
+## Core Features
+
+- User registration, login, and bearer-token authentication
+- Open Library book search and book detail lookup
+- Reading list CRUD operations
+- Reading list item management
+- Review CRUD operations
+- Genre analytics across cached books
+- User preference analysis based on saved books and reviews
+- Basic rule-based recommendations
+
+## Data Model
+
+The main database tables are:
+
+- `users`
+- `books`
+- `reading_lists`
+- `reading_list_items`
+- `reviews`
+
+The local `books` table acts as a cache for books that users save into reading
+lists, allowing analytics and recommendation features to work on local data.
+
 ## Setup
 
 ```bash
@@ -37,11 +79,95 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+After startup:
+
+- API root: `http://127.0.0.1:8000/`
+- Swagger UI: `http://127.0.0.1:8000/docs`
+- ReDoc: `http://127.0.0.1:8000/redoc`
+
+## Running Tests
+
+```bash
+python -m pytest
+```
+
+## Authentication
+
+Protected endpoints use Bearer token authentication.
+
+Typical flow:
+
+1. Register a user with `POST /api/auth/register`
+2. Log in with `POST /api/auth/login`
+3. Copy the returned `access_token`
+4. Send the header:
+
+```text
+Authorization: Bearer <your_token>
+```
+
+## Key Endpoints
+
+Authentication:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+
+Books:
+
+- `GET /api/books/search`
+- `GET /api/books/{openlibrary_key}`
+
+Reading lists:
+
+- `POST /api/lists`
+- `GET /api/lists`
+- `GET /api/lists/{list_id}`
+- `PUT /api/lists/{list_id}`
+- `DELETE /api/lists/{list_id}`
+- `POST /api/lists/{list_id}/items`
+- `PUT /api/lists/{list_id}/items/{item_id}`
+- `DELETE /api/lists/{list_id}/items/{item_id}`
+
+Reviews:
+
+- `POST /api/reviews`
+- `GET /api/reviews/{review_id}`
+- `GET /api/reviews/book/{book_id}`
+- `PUT /api/reviews/{review_id}`
+- `DELETE /api/reviews/{review_id}`
+
+Analytics:
+
+- `GET /api/analytics/genres`
+- `GET /api/analytics/user/{user_id}/preferences`
+- `GET /api/analytics/recommendations/user/{user_id}`
+
+## API Documentation
+
+A written endpoint summary is available in [API_DOCS.md](c:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/API_DOCS.md).
+You can also use the automatically generated Swagger UI from FastAPI.
+
+## Current Status
+
+Implemented:
+
+- project skeleton and database integration
+- authentication and access control
+- book search and detail lookup
+- reading list CRUD
+- review CRUD
+- analytics and recommendation endpoints
+- automated API tests
+
+Current test status:
+
+- `11 passed`
+
 ## Development Status
 
 Current stage:
 
-- Project skeleton created
-- Database configuration added
-- Router placeholders added
-- Ready for model and CRUD implementation
+- Main coursework functionality implemented
+- Ready for documentation refinement, technical report writing, and final polish
