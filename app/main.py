@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.database import Base, engine
+from app.error_handlers import register_error_handlers
 from app import models  # noqa: F401
 from app.routers import analytics, auth, books, lists, reviews
 
@@ -11,6 +12,8 @@ def create_application() -> FastAPI:
         description="Book search, reading list, review, and analytics API.",
         version="0.1.0",
     )
+
+    register_error_handlers(app)
 
     Base.metadata.create_all(bind=engine)
 

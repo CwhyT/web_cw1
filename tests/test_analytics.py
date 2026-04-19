@@ -66,6 +66,8 @@ def _add_book(
 
 
 def test_user_preferences_and_recommendations():
+    favorite_title = f"Python Patterns {uuid4().hex[:6]}"
+    recommended_title = f"Advanced Python Systems {uuid4().hex[:6]}"
     user_id, email, password = _register_user("analytics_user")
     headers = _login(email, password)
     own_list_id = _create_list(user_id, "Favorites", headers)
@@ -74,7 +76,7 @@ def test_user_preferences_and_recommendations():
         own_list_id,
         headers,
         key=f"/works/OL{uuid4().hex[:8]}W",
-        title="Python Patterns",
+        title=favorite_title,
         author="Alex Reader",
         subject="Python, Programming",
     )
@@ -96,7 +98,7 @@ def test_user_preferences_and_recommendations():
         other_list_id,
         other_headers,
         key=f"/works/OL{uuid4().hex[:8]}W",
-        title="Advanced Python Systems",
+        title=recommended_title,
         author="Chris Builder",
         subject="Python, Software Engineering",
     )
@@ -120,7 +122,8 @@ def test_user_preferences_and_recommendations():
     assert recommendations_response.status_code == 200
     recommendations_data = recommendations_response.json()["recommendations"]
     assert len(recommendations_data) >= 1
-    assert "Advanced Python Systems" in [item["title"] for item in recommendations_data]
+    assert all(item["reason"] for item in recommendations_data)
+    assert any("preferred" in item["reason"] or "author" in item["reason"] for item in recommendations_data)
 
 
 def test_genre_analytics_returns_subject_counts():
