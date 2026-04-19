@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.database import Base, engine
+from app import models  # noqa: F401
 from app.routers import analytics, auth, books, lists, reviews
 
 
@@ -31,4 +32,3 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
-

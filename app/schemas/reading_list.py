@@ -38,3 +38,15 @@ class ReadingListItemCreate(BaseModel):
 class ReadingListItemUpdate(BaseModel):
     status: str
 
+
+class ReadingListItemRead(BaseModel):
+    id: int
+    book_id: int
+    status: str
+    added_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class ReadingListDetailRead(ReadingListRead):
+    items: list[ReadingListItemRead] = []
