@@ -6,6 +6,7 @@ class BookSearchResult(BaseModel):
     title: str
     author_name: str | None = None
     first_publish_year: int | None = None
+    cover_url: str | None = None
 
 
 class BookRead(BaseModel):
@@ -19,3 +20,18 @@ class BookRead(BaseModel):
 
     model_config = {"from_attributes": True}
 
+
+class BookSearchResponse(BaseModel):
+    query: str
+    limit: int
+    results: list[BookSearchResult]
+
+
+class BookDetailResponse(BaseModel):
+    openlibrary_key: str
+    title: str
+    author_name: str | None = None
+    first_publish_year: int | None = None
+    subject: str | None = None
+    cover_url: str | None = None
+    description: str | None = None
