@@ -6,6 +6,7 @@ from app.models.book import Book
 from app.models.review import Review
 from app.models.user import User
 from app.schemas.review import ReviewCreate, ReviewRead, ReviewUpdate
+from app.security import get_current_user
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -21,12 +22,15 @@ def _get_review_or_404(db: Session, review_id: int) -> Review:
 
 
 @router.post("", response_model=ReviewRead, status_code=status.HTTP_201_CREATED)
-def create_review(payload: ReviewCreate, db: Session = Depends(get_db)) -> Review:
-    user = db.query(User).filter(User.id == payload.user_id).first()
-    if user is None:
+def create_review(
+    payload: ReviewCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Review:
+    if payload.user_id != current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only create reviews for your own account",
         )
 
     book = db.query(Book).filter(Book.id == payload.book_id).first()
@@ -75,8 +79,14 @@ def update_review(
     review_id: int,
     payload: ReviewUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> Review:
     review = _get_review_or_404(db, review_id)
+    if review.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only update your own reviews",
+        )
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(
@@ -93,8 +103,17 @@ def update_review(
 
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_review(review_id: int, db: Session = Depends(get_db)) -> Response:
+def delete_review(
+    review_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Response:
     review = _get_review_or_404(db, review_id)
+    if review.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only delete your own reviews",
+        )
     db.delete(review)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

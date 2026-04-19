@@ -14,6 +14,7 @@ from app.schemas.reading_list import (
     ReadingListRead,
     ReadingListUpdate,
 )
+from app.security import get_current_user
 
 router = APIRouter(prefix="/lists", tags=["lists"])
 
@@ -46,12 +47,15 @@ def _get_item_or_404(db: Session, list_id: int, item_id: int) -> ReadingListItem
 
 
 @router.post("", response_model=ReadingListRead, status_code=status.HTTP_201_CREATED)
-def create_list(payload: ReadingListCreate, db: Session = Depends(get_db)) -> ReadingList:
-    user = db.query(User).filter(User.id == payload.user_id).first()
-    if user is None:
+def create_list(
+    payload: ReadingListCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> ReadingList:
+    if payload.user_id != current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only create lists for your own account",
         )
 
     reading_list = ReadingList(
@@ -69,16 +73,31 @@ def create_list(payload: ReadingListCreate, db: Session = Depends(get_db)) -> Re
 def list_lists(
     user_id: int | None = Query(default=None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> list[ReadingList]:
     query = db.query(ReadingList)
-    if user_id is not None:
-        query = query.filter(ReadingList.user_id == user_id)
+    target_user_id = user_id if user_id is not None else current_user.id
+    if target_user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only view your own reading lists",
+        )
+    query = query.filter(ReadingList.user_id == target_user_id)
     return query.order_by(ReadingList.created_at.desc()).all()
 
 
 @router.get("/{list_id}", response_model=ReadingListDetailRead)
-def get_list(list_id: int, db: Session = Depends(get_db)) -> ReadingListDetailRead:
+def get_list(
+    list_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> ReadingListDetailRead:
     reading_list = _get_list_or_404(db, list_id)
+    if reading_list.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only view your own reading lists",
+        )
     items = (
         db.query(ReadingListItem)
         .filter(ReadingListItem.reading_list_id == list_id)
@@ -101,8 +120,14 @@ def update_list(
     list_id: int,
     payload: ReadingListUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> ReadingList:
     reading_list = _get_list_or_404(db, list_id)
+    if reading_list.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only update your own reading lists",
+        )
     updates = payload.model_dump(exclude_unset=True)
     if not updates:
         raise HTTPException(
@@ -119,8 +144,17 @@ def update_list(
 
 
 @router.delete("/{list_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_list(list_id: int, db: Session = Depends(get_db)) -> Response:
+def delete_list(
+    list_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Response:
     reading_list = _get_list_or_404(db, list_id)
+    if reading_list.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only delete your own reading lists",
+        )
 
     db.query(ReadingListItem).filter(
         ReadingListItem.reading_list_id == reading_list.id
@@ -139,8 +173,14 @@ def add_list_item(
     list_id: int,
     payload: ReadingListItemCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> ReadingListItem:
-    _get_list_or_404(db, list_id)
+    reading_list = _get_list_or_404(db, list_id)
+    if reading_list.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only modify your own reading lists",
+        )
 
     book = db.query(Book).filter(Book.openlibrary_key == payload.openlibrary_key).first()
     if book is None:
@@ -189,7 +229,14 @@ def update_list_item(
     item_id: int,
     payload: ReadingListItemUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> ReadingListItem:
+    reading_list = _get_list_or_404(db, list_id)
+    if reading_list.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only modify your own reading lists",
+        )
     item = _get_item_or_404(db, list_id, item_id)
     item.status = payload.status
     db.commit()
@@ -198,7 +245,18 @@ def update_list_item(
 
 
 @router.delete("/{list_id}/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_list_item(list_id: int, item_id: int, db: Session = Depends(get_db)) -> Response:
+def delete_list_item(
+    list_id: int,
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Response:
+    reading_list = _get_list_or_404(db, list_id)
+    if reading_list.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only modify your own reading lists",
+        )
     item = _get_item_or_404(db, list_id, item_id)
     db.delete(item)
     db.commit()
