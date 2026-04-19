@@ -1,0 +1,435 @@
+ShelfSense API Manual Test Template
+ShelfSense API 手动测试模板
+
+========================================
+1. Purpose / 用途
+========================================
+
+This file is a plain-text manual testing guide.
+这个文件是纯文本的手动测试指南。
+
+It is not meant to be executed directly.
+它不是用来直接运行的脚本。
+
+You can copy one section at a time into PowerShell.
+你可以一次复制一段到 PowerShell 里执行。
+
+
+========================================
+2. Before Testing / 测试前准备
+========================================
+
+Step 1:
+Start the API server first.
+先启动后端服务。
+
+Command:
+uvicorn app.main:app --reload
+
+
+Step 2:
+Open another PowerShell window.
+打开另一个 PowerShell 窗口。
+
+
+========================================
+3. Base URL / 基础地址
+========================================
+
+Copy:
+$baseUrl = "http://127.0.0.1:8000"
+
+Meaning / 含义:
+- This is the local API address.
+- 这是本地 API 地址。
+
+What can be changed / 可以改什么:
+- If your server runs on another port, change it here.
+- 如果你的服务运行在别的端口，可以改这里。
+
+
+========================================
+4. Health Check / 健康检查
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/health"
+
+Purpose / 用途:
+- Check whether the server is running.
+- 检查服务是否正常运行。
+
+
+========================================
+5. Register User / 注册用户
+========================================
+
+Copy:
+$registerBody = @{
+    username = "cyt"
+    email = "cyt@example.com"
+    password = "123456"
+} | ConvertTo-Json
+
+$user = Invoke-RestMethod `
+    -Method Post `
+    -Uri "$baseUrl/api/auth/register" `
+    -ContentType "application/json" `
+    -Body $registerBody
+
+$user
+
+Meaning / 含义:
+- This creates a new user.
+- 这会创建一个新用户。
+
+What should be changed / 应该改什么:
+- username
+- email
+- password
+
+Important / 注意:
+- email must be a valid email address.
+- email 必须是合法邮箱。
+
+
+========================================
+6. Login / 登录
+========================================
+
+Copy:
+$loginBody = @{
+    email = "cyt@example.com"
+    password = "123456"
+} | ConvertTo-Json
+
+$login = Invoke-RestMethod `
+    -Method Post `
+    -Uri "$baseUrl/api/auth/login" `
+    -ContentType "application/json" `
+    -Body $loginBody
+
+$token = $login.access_token
+$headers = @{ Authorization = "Bearer $token" }
+
+$login
+
+Meaning / 含义:
+- This logs in and gets the bearer token.
+- 这一步登录并获取 bearer token。
+
+What should be changed / 应该改什么:
+- email
+- password
+
+Important / 注意:
+- These must match the registered account.
+- 这里必须和刚才注册的账号一致。
+
+
+========================================
+7. Get Current User / 获取当前用户
+========================================
+
+Copy:
+$me = Invoke-RestMethod -Method Get -Uri "$baseUrl/api/auth/me" -Headers $headers
+$me
+
+Meaning / 含义:
+- This checks whether the token works.
+- 这一步检查 token 是否生效。
+
+
+========================================
+8. Search Books / 搜索图书
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/books/search?q=python&limit=3"
+
+What can be changed / 可以改什么:
+- q=python
+- limit=3
+
+
+========================================
+9. Get Book Detail / 获取图书详情
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/books/OL45804W"
+
+What can be changed / 可以改什么:
+- OL45804W
+
+
+========================================
+10. Create Reading List / 创建书单
+========================================
+
+Copy:
+$listBody = @{
+    user_id = 1
+    name = "My Test List"
+    description = "Created from PowerShell"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Method Post `
+    -Uri "$baseUrl/api/lists" `
+    -Headers $headers `
+    -ContentType "application/json" `
+    -Body $listBody
+
+Meaning / 含义:
+- This creates a reading list.
+- 这一步创建一个书单。
+
+What should be changed / 应该改什么:
+- user_id
+- name
+- description
+
+Important / 注意:
+- user_id should match the logged-in user.
+- user_id 应该和当前登录用户一致。
+
+
+========================================
+11. Get Reading Lists / 获取书单列表
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/lists" -Headers $headers
+
+
+========================================
+12. Get One Reading List / 获取单个书单
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/lists/1" -Headers $headers
+
+What should be changed / 应该改什么:
+- 1
+- Replace it with the actual list id.
+- 把 1 换成真实的书单 id。
+
+
+========================================
+13. Update Reading List / 更新书单
+========================================
+
+Copy:
+$updateListBody = @{
+    name = "Updated List Name"
+    description = "Updated description"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Method Put `
+    -Uri "$baseUrl/api/lists/1" `
+    -Headers $headers `
+    -ContentType "application/json" `
+    -Body $updateListBody
+
+What should be changed / 应该改什么:
+- 1
+- name
+- description
+
+
+========================================
+14. Add Book to Reading List / 向书单添加图书
+========================================
+
+Copy:
+$itemBody = @{
+    openlibrary_key = "/works/OL45804W"
+    title = "Learning Python"
+    author_name = "Mark Lutz"
+    first_publish_year = 1999
+    subject = "Python, Programming"
+    cover_url = "https://covers.openlibrary.org/b/id/12345-L.jpg"
+    status = "to_read"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Method Post `
+    -Uri "$baseUrl/api/lists/1/items" `
+    -Headers $headers `
+    -ContentType "application/json" `
+    -Body $itemBody
+
+What should be changed / 应该改什么:
+- /api/lists/1/items -> replace 1 with the actual list id
+- status
+- any book metadata fields if needed
+- 把书单 id 改成真实值
+
+
+========================================
+15. Update Reading List Item / 更新书单项状态
+========================================
+
+Copy:
+$itemUpdateBody = @{
+    status = "finished"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Method Put `
+    -Uri "$baseUrl/api/lists/1/items/1" `
+    -Headers $headers `
+    -ContentType "application/json" `
+    -Body $itemUpdateBody
+
+What should be changed / 应该改什么:
+- list id
+- item id
+- status
+
+
+========================================
+16. Delete Reading List Item / 删除书单项
+========================================
+
+Copy:
+Invoke-RestMethod -Method Delete -Uri "$baseUrl/api/lists/1/items/1" -Headers $headers
+
+What should be changed / 应该改什么:
+- list id
+- item id
+
+
+========================================
+17. Create Review / 创建评论
+========================================
+
+Copy:
+$reviewBody = @{
+    user_id = 1
+    book_id = 1
+    rating = 5
+    review_text = "Helpful and well structured."
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Method Post `
+    -Uri "$baseUrl/api/reviews" `
+    -Headers $headers `
+    -ContentType "application/json" `
+    -Body $reviewBody
+
+Meaning / 含义:
+- This creates a review for one locally cached book.
+- 这一步为本地缓存的一本书创建评论。
+
+What should be changed / 应该改什么:
+- user_id
+- book_id
+- rating
+- review_text
+
+Important / 注意:
+- rating must be between 1 and 5.
+- rating 必须在 1 到 5 之间。
+
+
+========================================
+18. Get One Review / 获取单条评论
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/reviews/1"
+
+What should be changed / 应该改什么:
+- review id
+
+
+========================================
+19. Get Reviews for One Book / 获取某本书的评论
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/reviews/book/1"
+
+What should be changed / 应该改什么:
+- book id
+
+
+========================================
+20. Update Review / 更新评论
+========================================
+
+Copy:
+$reviewUpdateBody = @{
+    rating = 4
+    review_text = "Still good, but slightly repetitive."
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Method Put `
+    -Uri "$baseUrl/api/reviews/1" `
+    -Headers $headers `
+    -ContentType "application/json" `
+    -Body $reviewUpdateBody
+
+What should be changed / 应该改什么:
+- review id
+- rating
+- review_text
+
+
+========================================
+21. Delete Review / 删除评论
+========================================
+
+Copy:
+Invoke-RestMethod -Method Delete -Uri "$baseUrl/api/reviews/1" -Headers $headers
+
+What should be changed / 应该改什么:
+- review id
+
+
+========================================
+22. Genre Analytics / 热门主题分析
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/analytics/genres"
+
+
+========================================
+23. User Preferences / 用户偏好分析
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/analytics/user/1/preferences"
+
+What should be changed / 应该改什么:
+- user id
+
+
+========================================
+24. Recommendations / 推荐结果
+========================================
+
+Copy:
+Invoke-RestMethod -Method Get -Uri "$baseUrl/api/analytics/recommendations/user/1"
+
+What should be changed / 应该改什么:
+- user id
+
+
+========================================
+25. Reset Database / 清空数据库
+========================================
+
+Copy:
+Remove-Item .\app.db
+
+Then restart the server:
+然后重新启动服务：
+
+uvicorn app.main:app --reload
