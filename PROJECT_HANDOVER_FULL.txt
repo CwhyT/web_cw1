@@ -1,0 +1,555 @@
+ShelfSense API Project Handover
+ShelfSense API 项目完整交接说明
+
+============================================================
+1. File Purpose / 文件用途
+============================================================
+
+This file is a full handover summary of the current repository.
+这个文件是当前仓库的完整交接说明。
+
+Its purpose is:
+它的目的是：
+
+- to help a human reviewer quickly understand the project
+- to help another AI model continue the work without losing context
+- to explain what has already been implemented
+- to explain what has been tested
+- to show which coursework requirements are already satisfied
+- to show which coursework tasks are still incomplete
+
+This file is intentionally more detailed than the README.
+这个文件有意写得比 README 更详细。
+
+
+============================================================
+2. Project Identity / 项目标识
+============================================================
+
+Project name:
+ShelfSense API
+
+Module:
+XJCO3011 Web Services and Web Data
+
+Project type:
+Individual coursework API development project
+
+Selected topic:
+Book search and recommendation analysis API
+
+High-level project idea:
+This project combines public book metadata from Open Library with local user
+data, reading lists, reviews, analytics, and recommendation features.
+
+Core positioning:
+This is a RESTful, SQL-backed book discovery and reading management API.
+
+
+============================================================
+3. Main Technology Choices / 主要技术选型
+============================================================
+
+Backend framework:
+- FastAPI
+
+Database:
+- SQLite
+
+ORM:
+- SQLAlchemy
+
+Validation:
+- Pydantic
+
+HTTP client for external API:
+- httpx
+
+Testing:
+- pytest
+
+External data source:
+- Open Library
+
+Authentication style:
+- Bearer token authentication using a lightweight custom token mechanism
+
+
+============================================================
+4. Current Repository Structure / 当前仓库结构
+============================================================
+
+Root files currently kept in the repository:
+
+- README.md
+- API_DOCS.md
+- FINAL_SUBMISSION_REPORT.rtf
+- PRESENTATION_OUTLINE.md
+- manual_test_template.txt
+- requirements.txt
+- pytest.ini
+- app.db
+
+Main directories:
+
+- app/
+- tests/
+
+What they are for:
+
+app/
+- contains the FastAPI application source code
+
+tests/
+- contains the automated test suite
+
+README.md
+- repository overview, setup, features, endpoints, current status
+
+API_DOCS.md
+- endpoint-level API documentation draft
+
+FINAL_SUBMISSION_REPORT.rtf
+- single-file report draft intended to be opened in Word or uploaded elsewhere
+
+PRESENTATION_OUTLINE.md
+- slide structure and oral presentation outline
+
+manual_test_template.txt
+- plain-text manual testing guide with copyable PowerShell examples
+
+app.db
+- local SQLite database file used during development and testing
+
+
+============================================================
+5. What Was Built / 已实现内容
+============================================================
+
+The following functionality has been implemented in code.
+以下功能已经在代码中实现。
+
+5.1 Authentication
+
+- User registration
+- User login
+- Current user lookup
+- Bearer token protection for protected endpoints
+- Ownership checks so users cannot modify other users' lists/reviews
+
+Implemented endpoints:
+
+- POST /api/auth/register
+- POST /api/auth/login
+- GET /api/auth/me
+
+
+5.2 Book Search and Book Detail
+
+- Search books through Open Library
+- View a single book detail through Open Library
+- Normalize Open Library work keys
+
+Implemented endpoints:
+
+- GET /api/books/search
+- GET /api/books/{openlibrary_key}
+
+
+5.3 Reading List CRUD
+
+- Create reading list
+- List reading lists
+- View single reading list
+- Update reading list
+- Delete reading list
+
+Implemented endpoints:
+
+- POST /api/lists
+- GET /api/lists
+- GET /api/lists/{list_id}
+- PUT /api/lists/{list_id}
+- DELETE /api/lists/{list_id}
+
+
+5.4 Reading List Item Management
+
+- Add a book to a reading list
+- Update book status within the reading list
+- Remove a book from the reading list
+- Cache the book locally in the SQL database when added
+
+Implemented endpoints:
+
+- POST /api/lists/{list_id}/items
+- PUT /api/lists/{list_id}/items/{item_id}
+- DELETE /api/lists/{list_id}/items/{item_id}
+
+
+5.5 Review CRUD
+
+- Create review
+- Get one review
+- Update review
+- Delete review
+- List all reviews for one local book
+
+Implemented endpoints:
+
+- POST /api/reviews
+- GET /api/reviews/{review_id}
+- GET /api/reviews/book/{book_id}
+- PUT /api/reviews/{review_id}
+- DELETE /api/reviews/{review_id}
+
+
+5.6 Analytics and Recommendations
+
+- Genre frequency analytics
+- User preference analytics
+- Rule-based recommendation logic
+
+Implemented endpoints:
+
+- GET /api/analytics/genres
+- GET /api/analytics/user/{user_id}/preferences
+- GET /api/analytics/recommendations/user/{user_id}
+
+
+5.7 Validation and Error Handling
+
+- Standard status codes are used
+- Validation errors are shortened into more user-friendly messages
+- Common cases include:
+  - Invalid email format
+  - Missing required field
+  - Rating must be between 1 and 5
+
+
+============================================================
+6. Database Design / 数据库设计
+============================================================
+
+Current main database tables:
+
+- users
+- books
+- reading_lists
+- reading_list_items
+- reviews
+
+Design intention:
+
+- users store authentication-related user records
+- books store locally cached books that were added into lists
+- reading_lists store user-owned list containers
+- reading_list_items store list-book relationships and status
+- reviews store user reviews on locally cached books
+
+Key database relationships:
+
+- one user -> many reading lists
+- one reading list -> many reading list items
+- one user -> many reviews
+- one book -> many reviews
+
+Important design note:
+
+The external source (Open Library) is used for live book search and details,
+while selected books are cached locally for analytics and recommendation logic.
+
+
+============================================================
+7. Work Completed Step by Step / 已完成工作过程
+============================================================
+
+The work progressed in the following broad stages:
+
+Stage 1: Brief understanding
+- The coursework brief was extracted and translated
+- The requirements were analysed section by section
+
+Stage 2: Topic selection
+- Several topic options were compared
+- The project topic was fixed as a book search and recommendation API
+- Open Library was selected as the external data source
+
+Stage 3: Planning and design
+- Project scope was defined
+- Database schema was designed
+- API routes were designed
+- Tech stack was selected
+
+Stage 4: Skeleton setup
+- FastAPI project skeleton was created
+- Folder structure was established
+- Initial models, schemas, routers, services, and tests folders were created
+
+Stage 5: Core CRUD implementation
+- User registration was implemented
+- Reading list CRUD was implemented
+- Reading list item management was implemented
+- Review CRUD was implemented
+
+Stage 6: External API integration
+- Open Library search endpoint integration was added
+- Open Library detail endpoint integration was added
+
+Stage 7: Analytics and recommendations
+- Genre analytics was implemented
+- User preference analytics was implemented
+- Rule-based recommendation logic was implemented
+
+Stage 8: Authentication hardening
+- Login was implemented
+- Bearer token support was added
+- Protected write endpoints were enforced
+- Ownership checks were added
+
+Stage 9: Error message improvement
+- Validation error output was shortened into more readable messages
+
+Stage 10: Documentation and repository improvement
+- README was improved
+- API documentation draft was written
+- Manual testing template was written
+- Single-file submission report draft was created
+- Presentation outline was created
+
+Stage 11: Code quality and test improvements
+- datetime.utcnow usage was replaced with timezone-aware UTC
+- Config values were moved toward a simple settings layer
+- Shared pytest helpers/fixtures were introduced
+- Permission and failure-path tests were expanded
+
+Stage 12: Repository cleanup
+- Temporary pytest cache folders were cleaned
+- Middle-stage draft clutter was reduced
+
+
+============================================================
+8. Automated Testing Status / 自动化测试情况
+============================================================
+
+Current automated result:
+
+- 16 passed
+
+The current test suite covers:
+
+Authentication:
+- successful login
+- invalid password rejection
+- /api/auth/me requires authentication
+
+Books:
+- search result transformation
+- detail transformation from Open Library payload
+
+Reading lists:
+- successful list creation
+- user cannot create list for another user id
+- user cannot view another user's list
+
+Reviews:
+- full review CRUD flow
+- missing book rejection
+- user cannot delete another user's review
+
+Analytics:
+- user preferences endpoint
+- recommendations endpoint
+- genre analytics basic result structure
+
+Validation:
+- invalid email format returns concise message
+- invalid rating returns concise message
+
+Health:
+- /health endpoint returns ok
+
+Testing tools used:
+- pytest
+- FastAPI TestClient
+- unittest.mock for external API mocking
+
+Manual testing support:
+- manual_test_template.txt provides copyable PowerShell examples
+
+
+============================================================
+9. Code Quality Improvements Already Made / 已做的代码质量改进
+============================================================
+
+The following quality improvements were completed:
+
+- introduced shared pytest fixtures and helpers
+- replaced deprecated datetime.utcnow() usage
+- added simple config layer for database URL and secret key
+- improved validation error readability
+- added ownership/permission tests
+- improved README structure and clarity
+
+
+============================================================
+10. Current Known Limitations / 当前已知局限
+============================================================
+
+These are known limitations of the current repository state:
+
+- SQLite is used primarily for local development
+- No external deployment is currently included in the repository
+- Recommendation logic is rule-based, not ML-based
+- No frontend client is included
+- API documentation is still a Markdown draft, not yet final PDF
+- Report is currently in draft form and still needs final polishing
+- Presentation slides have an outline, but not a finished PPTX file
+
+
+============================================================
+11. Coursework Requirement Mapping / 作业要求对照
+============================================================
+
+11.1 Requirements already satisfied in code
+
+These brief requirements are already satisfied by the current implementation:
+
+- at least one SQL-backed CRUD model
+- at least four HTTP endpoints
+- JSON responses
+- correct status/error handling
+- local executable API
+- version-controlled GitHub development
+- README exists
+- API documentation draft exists
+- testing evidence exists
+- authentication exists
+- advanced functionality beyond minimum pass exists
+
+More specifically:
+
+- reading_lists is a full CRUD resource
+- reviews is a full CRUD resource
+- Open Library integration is present
+- analytics and recommendation endpoints go beyond minimum pass level
+
+
+11.2 Requirements partially satisfied
+
+These are started but not fully completed in final submission form:
+
+- API documentation
+  - content exists as API_DOCS.md
+  - but brief expects a PDF form for final submission
+
+- technical report
+  - content exists in FINAL_SUBMISSION_REPORT.rtf
+  - but it still needs final editing/formatting for submission quality
+
+- GenAI declaration
+  - draft content exists inside the report
+  - but exact tools/purposes/log extracts still need final customization
+
+
+11.3 Requirements not yet fully completed
+
+These still remain before final coursework submission is truly complete:
+
+- technical report final version (likely PDF export)
+- API documentation PDF export
+- final PowerPoint slides (PPTX)
+- final GenAI appendix with actual conversation logs/screenshots
+- Minerva submission packaging
+- oral presentation preparation in final slide form
+
+
+============================================================
+12. What Still Needs To Be Done / 还剩哪些事项
+============================================================
+
+Priority 1: Final submission documents
+
+- finalize FINAL_SUBMISSION_REPORT.rtf
+- convert the report to PDF if required
+- export API_DOCS.md into PDF form
+- create final PPTX slides from PRESENTATION_OUTLINE.md
+- attach GenAI declaration details and representative conversation logs
+
+Priority 2: Submission packaging
+
+- ensure README links are accurate
+- ensure GitHub repository is public and presentable
+- ensure Minerva upload files are complete
+
+Priority 3: Presentation readiness
+
+- prepare 5-minute oral presentation
+- prepare Q&A answers on:
+  - why FastAPI
+  - why SQLite
+  - why RESTful API
+  - how authentication works
+  - how recommendations work
+  - how Open Library integration works
+  - how GenAI was used
+
+
+============================================================
+13. Files Most Important For Review / 最重要的审阅文件
+============================================================
+
+If a human or another AI wants to understand the project quickly, the most
+important files to read are:
+
+1. README.md
+- best repository overview
+
+2. API_DOCS.md
+- best endpoint-level summary
+
+3. FINAL_SUBMISSION_REPORT.rtf
+- best single-document submission draft
+
+4. PRESENTATION_OUTLINE.md
+- best overview of planned oral presentation
+
+5. app/main.py
+- entry point of the application
+
+6. app/routers/
+- core business logic routes
+
+7. tests/
+- current evidence of working behaviour
+
+
+============================================================
+14. Recommended Next Action / 建议下一步
+============================================================
+
+If continuing this project, the recommended next task is:
+
+Option A:
+- polish FINAL_SUBMISSION_REPORT.rtf into a final submission-ready report
+
+Option B:
+- turn PRESENTATION_OUTLINE.md into full slide text for PPT
+
+Option C:
+- export API documentation and report into final PDF forms
+
+
+============================================================
+15. Final Status Summary / 最终状态总结
+============================================================
+
+Current status in one sentence:
+
+The codebase is functionally complete for the coursework core API requirements,
+well tested at the automated level, and already supported by draft submission
+documents, but final coursework packaging materials are still incomplete.
+
+中文一句话总结：
+
+当前代码仓库已经完成课程作业核心 API 功能并通过自动化测试，也已有报告和展示材料草稿，但最终提交所需的正式报告、PDF 文档、PPT 和 GenAI 附录还需要继续完善。
