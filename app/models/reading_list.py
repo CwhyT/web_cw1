@@ -4,6 +4,7 @@ from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
+from app.time_utils import current_utc
 
 
 class ReadingList(Base):
@@ -14,10 +15,10 @@ class ReadingList(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime(timezone=True), default=current_utc, nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+        DateTime(timezone=True), default=current_utc, onupdate=current_utc, nullable=False
     )
 
 
@@ -34,6 +35,5 @@ class ReadingListItem(Base):
     book_id: Mapped[int] = mapped_column(ForeignKey("books.id"), nullable=False)
     status: Mapped[str] = mapped_column(String(30), default="to_read", nullable=False)
     added_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime(timezone=True), default=current_utc, nullable=False
     )
-

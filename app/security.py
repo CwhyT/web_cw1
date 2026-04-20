@@ -9,11 +9,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.config import settings
 from app.database import get_db
 from app.models.user import User
-
-TOKEN_TTL_SECONDS = 60 * 60 * 12
-SECRET_KEY = "shelfsense-dev-secret-key"
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -28,7 +26,7 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 def _sign(payload: str) -> str:
     signature = hmac.new(
-        SECRET_KEY.encode("utf-8"),
+        settings.secret_key.encode("utf-8"),
         payload.encode("utf-8"),
         hashlib.sha256,
     ).digest()
@@ -39,7 +37,7 @@ def create_access_token(user: User) -> str:
     payload = {
         "sub": user.id,
         "username": user.username,
-        "exp": int(time.time()) + TOKEN_TTL_SECONDS,
+        "exp": int(time.time()) + settings.token_ttl_seconds,
     }
     payload_json = json.dumps(payload, separators=(",", ":"), sort_keys=True)
     payload_b64 = base64.urlsafe_b64encode(payload_json.encode("utf-8")).decode("utf-8").rstrip("=")

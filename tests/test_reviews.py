@@ -69,3 +69,38 @@ def test_create_review_returns_404_for_missing_book(client):
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Book not found"
+
+
+def test_cannot_delete_another_users_review(client):
+    owner_id, owner_email, owner_password = register_user(client, "review_owner")
+    owner_headers = login_headers(client, owner_email, owner_password)
+    list_id = create_reading_list(client, owner_headers, owner_id, "Owner Review List")
+    item = add_book_to_list(
+        client,
+        owner_headers,
+        list_id,
+        key=f"/works/OL{uuid4().hex[:8]}W",
+        title="Ownership in APIs",
+        author="Taylor Rights",
+        subject="Security, APIs",
+    )
+
+    review_response = client.post(
+        "/api/reviews",
+        json={
+            "user_id": owner_id,
+            "book_id": item["book_id"],
+            "rating": 5,
+            "review_text": "Owner review",
+        },
+        headers=owner_headers,
+    )
+    assert review_response.status_code == 201
+    review_id = review_response.json()["id"]
+
+    _, other_email, other_password = register_user(client, "review_other")
+    other_headers = login_headers(client, other_email, other_password)
+    delete_response = client.delete(f"/api/reviews/{review_id}", headers=other_headers)
+
+    assert delete_response.status_code == 403
+    assert delete_response.json()["detail"] == "You can only delete your own reviews"

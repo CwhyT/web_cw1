@@ -4,6 +4,7 @@ from sqlalchemy import DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
+from app.time_utils import current_utc
 
 
 class Book(Base):
@@ -17,6 +18,5 @@ class Book(Base):
     subject: Mapped[str | None] = mapped_column(Text)
     cover_url: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, nullable=False
+        DateTime(timezone=True), default=current_utc, nullable=False
     )
-

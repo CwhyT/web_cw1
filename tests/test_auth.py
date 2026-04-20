@@ -50,3 +50,10 @@ def test_login_rejects_invalid_password(client):
     )
     assert login_response.status_code == 401
     assert login_response.json()["detail"] == "Invalid email or password"
+
+
+def test_me_requires_authentication(client):
+    response = client.get("/api/auth/me")
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Authentication required"
