@@ -1,85 +1,24 @@
 from uuid import uuid4
 
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
+from tests.helpers import add_book_to_list, create_reading_list, login_headers, register_user
 
 
-def _register_user(prefix: str) -> tuple[int, str, str]:
-    token = uuid4().hex[:8]
-    email = f"{prefix}_{token}@example.com"
-    password = "secret123"
-    response = client.post(
-        "/api/auth/register",
-        json={
-            "username": f"{prefix}_{token}",
-            "email": email,
-            "password": password,
-        },
-    )
-    assert response.status_code == 201
-    return response.json()["id"], email, password
-
-
-def _login(email: str, password: str) -> dict[str, str]:
-    response = client.post("/api/auth/login", json={"email": email, "password": password})
-    assert response.status_code == 200
-    return {"Authorization": f"Bearer {response.json()['access_token']}"}
-
-
-def _create_list(user_id: int, name: str, headers: dict[str, str]) -> int:
-    response = client.post(
-        "/api/lists",
-        json={"user_id": user_id, "name": name, "description": f"{name} description"},
-        headers=headers,
-    )
-    assert response.status_code == 201
-    return response.json()["id"]
-
-
-def _add_book(
-    list_id: int,
-    headers: dict[str, str],
-    *,
-    key: str,
-    title: str,
-    author: str,
-    subject: str,
-) -> int:
-    response = client.post(
-        f"/api/lists/{list_id}/items",
-        json={
-            "openlibrary_key": key,
-            "title": title,
-            "author_name": author,
-            "first_publish_year": 2024,
-            "subject": subject,
-            "cover_url": "https://example.com/cover.jpg",
-            "status": "finished",
-        },
-        headers=headers,
-    )
-    assert response.status_code == 201
-    return response.json()["book_id"]
-
-
-def test_user_preferences_and_recommendations():
+def test_user_preferences_and_recommendations(client):
     favorite_title = f"Python Patterns {uuid4().hex[:6]}"
-    recommended_title = f"Advanced Python Systems {uuid4().hex[:6]}"
-    user_id, email, password = _register_user("analytics_user")
-    headers = _login(email, password)
-    own_list_id = _create_list(user_id, "Favorites", headers)
+    user_id, email, password = register_user(client, "analytics_user")
+    headers = login_headers(client, email, password)
+    own_list_id = create_reading_list(client, headers, user_id, "Favorites")
 
-    favorite_book_id = _add_book(
-        own_list_id,
+    favorite_book = add_book_to_list(
+        client,
         headers,
+        own_list_id,
         key=f"/works/OL{uuid4().hex[:8]}W",
         title=favorite_title,
         author="Alex Reader",
         subject="Python, Programming",
     )
+    favorite_book_id = favorite_book["book_id"]
     client.post(
         "/api/reviews",
         json={
@@ -91,20 +30,22 @@ def test_user_preferences_and_recommendations():
         headers=headers,
     )
 
-    other_user_id, other_email, other_password = _register_user("analytics_other")
-    other_headers = _login(other_email, other_password)
-    other_list_id = _create_list(other_user_id, "Shared Shelf", other_headers)
-    _add_book(
-        other_list_id,
+    other_user_id, other_email, other_password = register_user(client, "analytics_other")
+    other_headers = login_headers(client, other_email, other_password)
+    other_list_id = create_reading_list(client, other_headers, other_user_id, "Shared Shelf")
+    add_book_to_list(
+        client,
         other_headers,
+        other_list_id,
         key=f"/works/OL{uuid4().hex[:8]}W",
-        title=recommended_title,
+        title=f"Advanced Python Systems {uuid4().hex[:6]}",
         author="Chris Builder",
         subject="Python, Software Engineering",
     )
-    _add_book(
-        other_list_id,
+    add_book_to_list(
+        client,
         other_headers,
+        other_list_id,
         key=f"/works/OL{uuid4().hex[:8]}W",
         title="History of Architecture",
         author="Dana Stone",
@@ -126,7 +67,7 @@ def test_user_preferences_and_recommendations():
     assert any("preferred" in item["reason"] or "author" in item["reason"] for item in recommendations_data)
 
 
-def test_genre_analytics_returns_subject_counts():
+def test_genre_analytics_returns_subject_counts(client):
     response = client.get("/api/analytics/genres")
     assert response.status_code == 200
     assert isinstance(response.json()["genres"], list)

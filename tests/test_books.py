@@ -1,13 +1,6 @@
 from unittest.mock import AsyncMock, patch
 
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
-
-
-def test_search_books_returns_transformed_results():
+def test_search_books_returns_transformed_results(client):
     mock_payload = {
         "docs": [
             {
@@ -34,7 +27,7 @@ def test_search_books_returns_transformed_results():
     assert data["results"][0]["cover_url"].endswith("/12345-L.jpg")
 
 
-def test_get_book_returns_open_library_detail():
+def test_get_book_returns_open_library_detail(client):
     mock_payload = {
         "key": "/works/OL45804W",
         "title": "Learning Python",

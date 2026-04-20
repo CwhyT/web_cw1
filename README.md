@@ -4,7 +4,7 @@ ShelfSense API is a coursework project for `XJCO3011 Web Services and Web Data`.
 It provides book search, reading list management, reviews, analytics, and
 recommendation endpoints backed by a SQL database and Open Library data.
 
-## Project Overview
+## Overview
 
 ShelfSense API is a data-driven REST API for book discovery and personal reading
 management. The project combines:
@@ -21,6 +21,18 @@ The API was designed to satisfy the coursework requirements for:
 - correct error handling and status codes
 - external data integration
 - clear documentation and version-controlled development
+
+## Coursework Context
+
+This repository contains the implementation for an individual API development
+project. The system was designed to demonstrate:
+
+- resource-oriented RESTful API design
+- SQL-backed CRUD operations
+- external API integration
+- authentication and protected endpoints
+- analytics and recommendation functionality
+- automated testing and reproducible local setup
 
 ## Tech Stack
 
@@ -46,7 +58,7 @@ tests/
 requirements.txt
 ```
 
-## Core Features
+## Features
 
 - User registration, login, and bearer-token authentication
 - Open Library book search and book detail lookup
@@ -70,7 +82,7 @@ The main database tables are:
 The local `books` table acts as a cache for books that users save into reading
 lists, allowing analytics and recommendation features to work on local data.
 
-## Setup
+## Quick Start
 
 ```bash
 python -m venv .venv
@@ -84,6 +96,16 @@ After startup:
 - API root: `http://127.0.0.1:8000/`
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
+
+## Manual Testing
+
+For manual terminal-based testing, see `manual_test_template.txt`.
+
+That file contains:
+
+- copyable PowerShell request examples
+- example values for `user_id`, `book_id`, and route parameters
+- notes on which fields should be changed during testing
 
 ## Running Tests
 
@@ -144,10 +166,26 @@ Analytics:
 - `GET /api/analytics/user/{user_id}/preferences`
 - `GET /api/analytics/recommendations/user/{user_id}`
 
-## API Documentation
+## Documentation
 
-A written endpoint summary is available in [API_DOCS.md](c:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/API_DOCS.md).
-You can also use the automatically generated Swagger UI from FastAPI.
+- `API_DOCS.md`: written endpoint summary with example requests and responses
+- Swagger UI: interactive documentation at `/docs`
+- ReDoc: alternative generated documentation at `/redoc`
+
+## Data Source
+
+This project uses Open Library as the external public book data source:
+
+- Open Library search endpoint
+- Open Library work detail endpoint
+
+Locally cached book data is then used for:
+
+- reading list storage
+- review storage
+- genre analytics
+- user preference analysis
+- rule-based recommendations
 
 ## Current Status
 
@@ -160,14 +198,34 @@ Implemented:
 - review CRUD
 - analytics and recommendation endpoints
 - automated API tests
+- written API documentation draft
 
-Current test status:
+Current automated test status:
 
-- `11 passed`
+- `13 passed`
 
-## Development Status
+## Known Limitations
 
-Current stage:
+- The project is currently designed for local execution with SQLite.
+- Recommendation logic is rule-based rather than machine-learning-based.
+- Open Library availability affects live search and book detail responses.
+- Some development-only warnings remain, such as `datetime.utcnow()` deprecation warnings.
 
-- Main coursework functionality implemented
-- Ready for documentation refinement, technical report writing, and final polish
+## Repository Notes
+
+- `app/`: application source code
+- `tests/`: automated test suite
+- `API_DOCS.md`: endpoint documentation draft
+- `manual_test_template.txt`: plain-text manual testing guide
+- `brief_translation_zh.md`: translated coursework brief used during planning
+
+## Next Submission Tasks
+
+The core API implementation is complete, but the following coursework materials
+still need to be finalized outside this README:
+
+- technical report PDF
+- API documentation PDF export
+- presentation slides
+- GenAI declaration and conversation-log appendix
+- final submission packaging for Minerva

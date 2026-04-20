@@ -1,12 +1,6 @@
-from fastapi.testclient import TestClient
 from uuid import uuid4
 
-from app.main import app
-
-client = TestClient(app)
-
-
-def test_register_returns_short_email_error():
+def test_register_returns_short_email_error(client):
     response = client.post(
         "/api/auth/register",
         json={"username": "cyt", "email": "123", "password": "123"},
@@ -16,7 +10,7 @@ def test_register_returns_short_email_error():
     assert response.json()["detail"] == "Invalid email format"
 
 
-def test_review_returns_short_rating_error():
+def test_review_returns_short_rating_error(client):
     token = uuid4().hex[:8]
     email = f"validation_{token}@example.com"
     password = "secret123"

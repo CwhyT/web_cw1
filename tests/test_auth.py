@@ -1,13 +1,6 @@
 from uuid import uuid4
 
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
-
-
-def test_login_returns_token_and_current_user():
+def test_login_returns_token_and_current_user(client):
     token = uuid4().hex[:8]
     email = f"auth_{token}@example.com"
     password = "secret123"
@@ -37,7 +30,7 @@ def test_login_returns_token_and_current_user():
     assert me_response.json()["email"] == email
 
 
-def test_login_rejects_invalid_password():
+def test_login_rejects_invalid_password(client):
     token = uuid4().hex[:8]
     email = f"auth_fail_{token}@example.com"
 

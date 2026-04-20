@@ -1,68 +1,22 @@
 from uuid import uuid4
 
-from fastapi.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
+from tests.helpers import add_book_to_list, create_reading_list, login_headers, register_user
 
 
-def _create_user() -> tuple[int, str, str]:
-    token = uuid4().hex[:8]
-    email = f"reviewer_{token}@example.com"
-    password = "secret123"
-    response = client.post(
-        "/api/auth/register",
-        json={
-            "username": f"reviewer_{token}",
-            "email": email,
-            "password": password,
-        },
+def test_review_crud_flow(client):
+    user_id, email, password = register_user(client, "reviewer")
+    headers = login_headers(client, email, password)
+    list_id = create_reading_list(client, headers, user_id, "Review Queue", "Books to review")
+    item = add_book_to_list(
+        client,
+        headers,
+        list_id,
+        key=f"/works/OL{uuid4().hex[:8]}W",
+        title="Test Driven Reading",
+        author="Alex Reader",
+        subject="Software Testing",
     )
-    assert response.status_code == 201
-    return response.json()["id"], email, password
-
-
-def _auth_headers(email: str, password: str) -> dict[str, str]:
-    response = client.post("/api/auth/login", json={"email": email, "password": password})
-    assert response.status_code == 200
-    return {"Authorization": f"Bearer {response.json()['access_token']}"}
-
-
-def _create_list_with_book(user_id: int, headers: dict[str, str]) -> tuple[int, int]:
-    list_response = client.post(
-        "/api/lists",
-        json={
-            "user_id": user_id,
-            "name": "Review Queue",
-            "description": "Books to review",
-        },
-        headers=headers,
-    )
-    assert list_response.status_code == 201
-    list_id = list_response.json()["id"]
-
-    item_response = client.post(
-        f"/api/lists/{list_id}/items",
-        json={
-            "openlibrary_key": f"/works/OL{uuid4().hex[:8]}W",
-            "title": "Test Driven Reading",
-            "author_name": "Alex Reader",
-            "first_publish_year": 2024,
-            "subject": "Software Testing",
-            "cover_url": "https://example.com/cover.jpg",
-            "status": "finished",
-        },
-        headers=headers,
-    )
-    assert item_response.status_code == 201
-    return list_id, item_response.json()["book_id"]
-
-
-def test_review_crud_flow():
-    user_id, email, password = _create_user()
-    headers = _auth_headers(email, password)
-    _, book_id = _create_list_with_book(user_id, headers)
+    book_id = item["book_id"]
 
     create_response = client.post(
         "/api/reviews",
@@ -99,9 +53,9 @@ def test_review_crud_flow():
     assert delete_response.status_code == 204
 
 
-def test_create_review_returns_404_for_missing_book():
-    user_id, email, password = _create_user()
-    headers = _auth_headers(email, password)
+def test_create_review_returns_404_for_missing_book(client):
+    user_id, email, password = register_user(client, "reviewer_missing_book")
+    headers = login_headers(client, email, password)
     response = client.post(
         "/api/reviews",
         json={
