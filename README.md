@@ -202,14 +202,14 @@ Implemented:
 
 Current automated test status:
 
-- `13 passed`
+- `16 passed`
 
 ## Known Limitations
 
 - The project is currently designed for local execution with SQLite.
 - Recommendation logic is rule-based rather than machine-learning-based.
 - Open Library availability affects live search and book detail responses.
-- Some development-only warnings remain, such as `datetime.utcnow()` deprecation warnings.
+- Pytest cache warnings may still appear in this environment because of local filesystem permissions.
 
 ## Repository Notes
 
