@@ -1,3 +1,4 @@
+FOR Input command, see ./manual_test_template.txt!!!
 # ShelfSense API
 
 ShelfSense API is a coursework project for `XJCO3011 Web Services and Web Data`.
@@ -6,11 +7,11 @@ recommendation endpoints backed by a SQL database and Open Library data.
 
 ## Submission Documents
 
-The main coursework documents are kept in [`documentation/`](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation):
+The main coursework documents are kept in [`documentation/`](./documentation):
 
-- [API_Documentation.pdf](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/API_Documentation.pdf)
-- [Technical_Report.pdf](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/Technical_Report.pdf)
-- [Presentation_Slides_Outline.md](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/Presentation_Slides_Outline.md)
+- [API_Documentation.pdf](./documentation/API_Documentation.pdf)
+- [Technical_Report.pdf](./documentation/Technical_Report.pdf)
+- [ShelfSense_API_Presentation.pptx](./documentation/ShelfSense_API_Presentation)
 
 Current deployment status:
 - local execution only
