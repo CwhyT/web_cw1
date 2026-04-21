@@ -4,6 +4,20 @@ ShelfSense API is a coursework project for `XJCO3011 Web Services and Web Data`.
 It provides book search, reading list management, reviews, analytics, and
 recommendation endpoints backed by a SQL database and Open Library data.
 
+## Submission Documents
+
+The main coursework documents are kept in [`documentation/`](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation):
+
+- [API_Documentation.pdf](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/API_Documentation.pdf)
+- [Technical_Report.pdf](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/Technical_Report.pdf)
+- [Presentation_Slides_Outline.md](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/Presentation_Slides_Outline.md)
+
+Current deployment status:
+- local execution only
+
+Current automated test summary:
+- `16 passed`
+
 ## Overview
 
 ShelfSense API is a data-driven REST API for book discovery and personal reading
@@ -94,6 +108,7 @@ uvicorn app.main:app --reload
 After startup:
 
 - API root: `http://127.0.0.1:8000/`
+- Health check: `http://127.0.0.1:8000/health`
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 
@@ -106,6 +121,10 @@ That file contains:
 - copyable PowerShell request examples
 - example values for `user_id`, `book_id`, and route parameters
 - notes on which fields should be changed during testing
+
+Important:
+- if you use the `$baseUrl` variable in PowerShell, define it first with `http://127.0.0.1:8000`
+- or use full URLs directly in each `Invoke-RestMethod` command
 
 ## Running Tests
 
@@ -168,7 +187,9 @@ Analytics:
 
 ## Documentation
 
-- `API_DOCS.md`: written endpoint summary with example requests and responses
+- [documentation/API_Documentation.pdf](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/API_Documentation.pdf): final API documentation
+- [documentation/Technical_Report.pdf](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/Technical_Report.pdf): technical report
+- [documentation/Presentation_Slides_Outline.md](C:/Users/12617/Desktop/learning_sources/coursework/web/web_cw1/documentation/Presentation_Slides_Outline.md): slide outline for the presentation
 - Swagger UI: interactive documentation at `/docs`
 - ReDoc: alternative generated documentation at `/redoc`
 
@@ -187,7 +208,7 @@ Locally cached book data is then used for:
 - user preference analysis
 - rule-based recommendations
 
-## Current Status
+## Submission Status
 
 Implemented:
 
@@ -198,11 +219,25 @@ Implemented:
 - review CRUD
 - analytics and recommendation endpoints
 - automated API tests
-- written API documentation draft
+- API documentation PDF
+- technical report PDF
 
 Current automated test status:
 
 - `16 passed`
+
+Submission materials currently available:
+
+- GitHub repository
+- API documentation PDF
+- technical report PDF
+- presentation slide outline
+
+Submission materials still to finalize:
+
+- final slide deck export if required as PPTX or PDF
+- representative GenAI conversation-log appendix
+- final Minerva packaging check
 
 ## Known Limitations
 
@@ -215,17 +250,14 @@ Current automated test status:
 
 - `app/`: application source code
 - `tests/`: automated test suite
-- `API_DOCS.md`: endpoint documentation draft
+- `documentation/`: coursework submission documents
 - `manual_test_template.txt`: plain-text manual testing guide
-- `brief_translation_zh.md`: translated coursework brief used during planning
 
 ## Next Submission Tasks
 
 The core API implementation is complete, but the following coursework materials
 still need to be finalized outside this README:
 
-- technical report PDF
-- API documentation PDF export
-- presentation slides
-- GenAI declaration and conversation-log appendix
-- final submission packaging for Minerva
+- final slide deck export if your submission requires PPTX rather than an outline
+- representative GenAI conversation-log appendix or supplementary evidence
+- final Minerva submission packaging and upload check
